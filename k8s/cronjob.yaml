@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: flaresync
+spec:
+  schedule: "10 06 * * *" # At 09:10 GMT+3
+  successfulJobsHistoryLimit: 14
+  failedJobsHistoryLimit: 14
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: flaresync-non-prod
+            image: flaresync:0.2
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: CORALOGIX_KEY_GSM_NAME
+              value: "private-key"
+            - name: CORALOGIX_APP_NAME
+              value: "app"
+            args:
+            - -project
+            - someproject
+            - -policy
+            - somepolicy
+            resources:
+              limits:
+                cpu: 50m
+                memory: 50Mi
+              requests:
+                cpu: 50m
+                memory: 50Mi
+          restartPolicy: OnFailure
+          serviceAccount: sa
+          serviceAccountName: sa
